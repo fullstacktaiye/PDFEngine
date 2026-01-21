@@ -1,4 +1,5 @@
 import json
+import re
 import pypdf
 import fitz  # PyMuPDF
 
@@ -62,10 +63,14 @@ def extract_text_coordinates(pdf_path):
             
             for w in words:
                 x0, y0, x1, y1, text, block_no, line_no, word_no = w
+                
+                # Check for list pattern (a., b., c., etc.)
+                is_list_marker = bool(re.match(r'^[a-d]\.$', text, re.IGNORECASE))
+                
                 page_data["text_and_coords"].append({
                     "text": text,
                     "bbox": [x0, y0, x1, y1], # Absolute coordinates
-                    # Callers might want percentages, which they can calc using page width/height
+                    "is_list_marker": is_list_marker
                 })
             
             result["pages"].append(page_data)
@@ -75,6 +80,72 @@ def extract_text_coordinates(pdf_path):
     except Exception as e:
         print(f"Error extracting text from {pdf_path}: {e}")
         return {}
+
+def extract_visual_elements(pdf_path):
+    """
+    Detects visual elements like underlines (potential text inputs) and boxes.
+    """
+    try:
+        doc = fitz.open(pdf_path)
+        visuals = []
+
+        for page_num, page in enumerate(doc):
+            drawings = page.get_drawings()
+            page_visuals = {
+                "page_number": page_num + 1,
+                "lines": [],
+                "boxes": []
+            }
+            
+            for shape in drawings:
+                rect = shape["rect"]
+                width = rect.width
+                height = rect.height
+                
+                # Heuristics
+                # Line: very short height, decent width
+                if height < 5 and width > 20:
+                    page_visuals["lines"].append(list(rect))
+                
+                # Box: decent height and width (e.g. for checkboxes or larger text areas)
+                elif height > 8 and width > 8:
+                    # Filter out whole page borders if necessary
+                    if width < page.rect.width * 0.9:
+                        page_visuals["boxes"].append(list(rect))
+            
+            visuals.append(page_visuals)
+            
+        return visuals
+
+    except Exception as e:
+        print(f"Error extracting visual elements from {pdf_path}: {e}")
+        return []
+
+def extract_tables(pdf_path):
+    """
+    Uses PyMuPDF's table detection to find grid structures.
+    """
+    try:
+        doc = fitz.open(pdf_path)
+        tables_data = []
+
+        for page_num, page in enumerate(doc):
+            tabs = page.find_tables()
+            if tabs.tables:
+                for table in tabs:
+                    tables_data.append({
+                        "page_number": page_num + 1,
+                        "bbox": list(table.bbox),
+                        "row_count": table.row_count,
+                        "col_count": table.col_count,
+                        # "content": table.extract() # Optional: Extract cell content
+                    })
+        
+        return tables_data
+
+    except Exception as e:
+        print(f"Error extracting tables from {pdf_path}: {e}")
+        return []
 
 if __name__ == "__main__":
     import sys
@@ -102,4 +173,20 @@ if __name__ == "__main__":
     if text_data["pages"]:
         page1 = text_data["pages"][0]
         print(f"Page 1 Dimensions: {page1['width']}x{page1['height']}")
-        print("Sample words:", json.dumps(page1["text_and_coords"][:5], indent=2))
+        print("Sample words (looking for list markers):", json.dumps(page1["text_and_coords"][:5], indent=2))
+        
+    # Visual Elements
+    print("\n[Visual Elements] Detecting underlines and boxes...")
+    visuals = extract_visual_elements(path)
+    if visuals:
+        v_page1 = visuals[0]
+        print(f"Page 1 Lines: {len(v_page1['lines'])}, Boxes: {len(v_page1['boxes'])}")
+        
+    # Tables
+    print("\n[Tables] Detecting table structures...")
+    tables = extract_tables(path)
+    if tables:
+        print(f"Found {len(tables)} tables.")
+        print(json.dumps(tables, indent=2))
+    else:
+        print("No tables detected.")
