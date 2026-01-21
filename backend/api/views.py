@@ -8,7 +8,8 @@ from utils.pdf_tools import (
     extract_acroform_data,
     extract_text_coordinates,
     extract_visual_elements,
-    extract_tables
+    extract_tables,
+    extract_interactive_fields
 )
 
 class PDFAnalysisView(APIView):
@@ -34,6 +35,9 @@ class PDFAnalysisView(APIView):
             # Route 1: AcroForm Detection
             acroform_data = extract_acroform_data(temp_pdf_path)
             
+            # Interactive Fields (Widgets with coordinates)
+            interactive_fields = extract_interactive_fields(temp_pdf_path)
+            
             # Route 2: Text & Coordinates
             text_data = extract_text_coordinates(temp_pdf_path)
             
@@ -46,11 +50,13 @@ class PDFAnalysisView(APIView):
             response_data = {
                 "file_name": file_obj.name,
                 "acroform_fields": acroform_data,
+                "interactive_fields": interactive_fields,
                 "text_content": text_data,
                 "visual_elements": visual_elements,
                 "tables": tables,
                 "analysis_summary": {
                     "has_acroform": bool(acroform_data),
+                    "interactive_field_count": len(interactive_fields),
                     "page_count": text_data.get("page_count", 0) if text_data else 0,
                     "table_count": len(tables) if tables else 0
                 }

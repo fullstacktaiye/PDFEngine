@@ -147,6 +147,44 @@ def extract_tables(pdf_path):
         print(f"Error extracting tables from {pdf_path}: {e}")
         return []
 
+def extract_interactive_fields(pdf_path):
+    """
+    Extracts interactive form fields (widgets) with their coordinates using PyMuPDF.
+    """
+    try:
+        doc = fitz.open(pdf_path)
+        fields = []
+        
+        for page_num, page in enumerate(doc):
+            # Page.widgets() is a generator in newer PyMuPDF versions
+            # Inspecting annotations for widgets is more robust
+            for annot in page.annots():
+                if annot.type[0] == 19: # 19 = Widget
+                    rect = annot.rect
+                    try:
+                        # Try to get field info. Note: PyMuPDF handling of form fields can vary by version.
+                        # Accessing direct widget properties is easier if we iterate widgets explicitly if available
+                        pass 
+                    except:
+                        pass
+            
+            # Use widgets() iterator if available (standard way for forms)
+            for widget in page.widgets():
+                fields.append({
+                    "page_number": page_num + 1,
+                    "name": widget.field_name,
+                    "value": widget.field_value,
+                    "bbox": list(widget.rect),
+                    "type": widget.field_type_string # e.g. 'Text', 'Btn', 'Chb'
+                })
+                
+        return fields
+
+    except Exception as e:
+        print(f"Error extracting interactive fields from {pdf_path}: {e}")
+        return []
+
+
 if __name__ == "__main__":
     import sys
     

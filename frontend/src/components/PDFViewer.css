@@ -55,7 +55,8 @@
   height: 100%;
   z-index: 50;
   pointer-events: auto;
-  cursor: crosshair;
+  /* cursor: crosshair; */
+  /* Removed to feel more like a normal viewer */
 }
 
 
