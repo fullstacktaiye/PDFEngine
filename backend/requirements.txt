@@ -1,0 +1,10 @@
+asgiref==3.11.0
+charset-normalizer==3.4.4
+Django==5.2.10
+djangorestframework==3.16.1
+pdf2image==1.17.0
+pillow==12.1.0
+PyMuPDF==1.26.7
+pypdf==6.6.0
+reportlab==4.4.9
+sqlparse==0.5.5

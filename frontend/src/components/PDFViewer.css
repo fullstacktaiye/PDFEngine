@@ -1,0 +1,115 @@
+.pdf-viewer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  min-height: 400px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.pdf-viewer-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  width: 100%;
+  color: #6c757d;
+  font-size: 1.1rem;
+  background-color: #f1f3f5;
+  border-radius: 8px;
+  border: 2px dashed #dee2e6;
+}
+
+.pdf-document-wrapper {
+  margin-bottom: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  background: white;
+}
+
+/* React-PDF specific overrides */
+.pdf-document {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pdf-page canvas {
+  max-width: 100%;
+  height: auto !important;
+  display: block;
+}
+
+.pdf-page-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 50;
+  pointer-events: auto;
+  cursor: crosshair;
+}
+
+
+.pdf-controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 24px;
+  background: white;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.control-button {
+  background-color: #228be6;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.control-button:hover:not(:disabled) {
+  background-color: #1c7ed6;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(34, 139, 230, 0.3);
+}
+
+.control-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.control-button:disabled {
+  background-color: #adb5bd;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.page-info {
+  font-weight: 500;
+  color: #495057;
+  min-width: 100px;
+  text-align: center;
+}
+
+.pdf-error {
+  padding: 20px;
+  background-color: #ffe3e3;
+  color: #c92a2a;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
